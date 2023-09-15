@@ -1,7 +1,10 @@
 #pragma once
 
 #include <cassert>
+#include <cstdio>
 #include <cstdlib>
+#include <fstream>
+#include <iostream>
 #include <optional>
 #include <ostream>
 #include <variant>
@@ -127,6 +130,11 @@ public:
         while (peek().has_value()) {
             if (auto stmt = parse_stmt()) {
                 prog.stmts.push_back(stmt.value());
+                // dbg!
+                // if (stmt.has_value()) {
+                //     auto x = stmt.value().var;
+                //     printf("%p\n", &x);
+                // }
             }
             else {
                 std::cerr << "Invalid statement" << std::endl;

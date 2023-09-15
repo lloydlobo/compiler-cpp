@@ -48,28 +48,32 @@ int main(int argc, char* argv[])
     std::vector<Token> tokens = tokenizer.tokenize(); // tokenize(contents);
 
     // LOG
-    {
-        std::cout << "DEBUG::START" << std::endl;
-        for (int i = 0; i < tokens.capacity() - 1; i++) {
-            std::cout << ">>" << tokens.at(i).value.value_or("") << std::endl;
-        }
-        std::cout << "DEBUG::END" << std::endl;
-    }
+    // {
+    //     std::cout << "DEBUG::START"
+    //               << "\n";
+    //     for (int i = 0; i < tokens.capacity() - 1; i++) {
+    //         std::cout << ">>" << tokens.at(i).value.value_or("") << "\n";
+    //     }
+    //     std::cout << "DEBUG::END"
+    //               << "\n";
+    // }
 
     Parser parser(std::move(tokens));
-    std::optional<NodeExit> tree = parser.parse();
+    std::optional<NodeProg> prog = parser.parse_prog();
 
-    if (!tree.has_value()) {
-        std::cerr << "No exit statement found" << std::endl;
+    if (!prog.has_value()) {
+        std::cerr << "Invalid program" << std::endl;
         exit(EXIT_FAILURE);
     }
 
-    Generator generator(tree.value());
+    Generator generator(prog.value());
     {
+        // std::string asm_from_parsed_tokens = generator.gen_prog(); // tokens_to_asm(tokens);
+        // std::cout << asm_from_parsed_tokens << "/n"; // TEMPNOTE: For Logging only.
+        //
         std::fstream file("out.asm", std::ios::out);
-        std::string asm_from_parsed_tokens = generator.generate(); // tokens_to_asm(tokens);
-        std::cout << asm_from_parsed_tokens << std::endl; // TEMPNOTE: For Logging only.
-        file << asm_from_parsed_tokens;
+        file << generator.gen_prog(); // tokens_to_asm(tokens);
+        // file << asm_from_parsed_tokens;
     }
 
     system("nasm -felf64 out.asm");
