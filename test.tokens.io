@@ -1,6 +1,0 @@
-return 10;
-
-RETURN
-INT_LIT => 10
-SEMI
-

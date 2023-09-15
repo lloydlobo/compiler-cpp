@@ -9,6 +9,11 @@ enum class TokenType {
     exit,
     int_lit,
     semi,
+    open_paren,
+    close_paren,
+    ident,
+    let,
+    eq,
 };
 
 struct Token {
@@ -38,9 +43,15 @@ public:
                     tokens.push_back({ .type = TokenType::exit });
                     buf.clear();
                 }
+                else if (buf == "let") {
+                    tokens.push_back({ .type = TokenType::let });
+                    buf.clear();
+                }
                 else {
-                    std::cerr << "You messed up! `exit`" << std::endl;
-                    exit(EXIT_FAILURE);
+                    // std::cerr << "You messed up! `exit`" << std::endl;
+                    // exit(EXIT_FAILURE);
+                    tokens.push_back({ .type = TokenType::ident, .value = buf });
+                    buf.clear();
                 }
             }
             else if (std::isdigit(peek().value())) {
@@ -51,9 +62,21 @@ public:
                 tokens.push_back({ .type = TokenType::int_lit, .value = buf });
                 buf.clear();
             }
+            else if (peek().value() == '(') {
+                consume();
+                tokens.push_back({ .type = TokenType::open_paren });
+            }
+            else if (peek().value() == ')') {
+                consume();
+                tokens.push_back({ .type = TokenType::close_paren });
+            }
             else if (peek().value() == ';') {
                 consume();
                 tokens.push_back({ .type = TokenType::semi });
+            }
+            else if (peek().value() == '=') {
+                consume();
+                tokens.push_back({ .type = TokenType::eq });
             }
             else if (std::isspace(peek().value())) {
                 consume();
