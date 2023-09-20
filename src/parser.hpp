@@ -74,7 +74,6 @@ public:
             NodeStmtExit stmt_exit;
 
             if (auto node_expr = parse_expr()) {
-                // stmt_exit = { .expr = node_expr.value() };
                 stmt_exit = NodeStmtExit { .expr = node_expr.value() };
             }
             else {
@@ -130,11 +129,6 @@ public:
         while (peek().has_value()) {
             if (auto stmt = parse_stmt()) {
                 prog.stmts.push_back(stmt.value());
-                // dbg!
-                // if (stmt.has_value()) {
-                //     auto x = stmt.value().var;
-                //     printf("%p\n", &x);
-                // }
             }
             else {
                 std::cerr << "Invalid statement" << std::endl;

@@ -4,6 +4,7 @@
 #include "sstream"
 #include <cassert>
 #include <cstddef>
+#include <cstdlib>
 #include <sstream>
 #include <unordered_map>
 #include <variant>
@@ -22,22 +23,34 @@ public:
             void operator()(const NodeExprIntLit& term) const
             {
                 gen->m_output << "    mov rax, " << term.int_lit.value.value() << "\n";
-                gen->m_output << "    push rax\n";
+                gen->push("rax"); // gen->m_output << "    push rax\n";
             }
+            // Offset(in bytes) stack pointer by 2, copy value, and push copied to top of stack
+            // stack_loc,size,etc use 1 (as 64bits) and 8*8 // See 01:20:00 (Compiler Pt.3)
             void operator()(const NodeExprIdent& ident)
             {
-                // TODO
-                // gen->m_output << "mov rax, " << ident.ident.value.value() << "\n";
-                // gen->m_output << "push rax \n";
+                if (!gen->m_vars.contains(ident.ident.value.value())) {
+                    std::cerr << "Undeclared identifier: " << ident.ident.value.value() << std::endl;
+                    exit(EXIT_FAILURE);
+                }
+                const auto& var = gen->m_vars.at(ident.ident.value.value());
+
+                std::stringstream offset;
+                auto BIT_MULTIPLIER = 8; // 64bits - quad word 4 bytes in 32bits and 8 bytes in 64bits
+                auto OFF_BY_ONE = 1; // when second var is called instead of the prior. let x = 7; let y = 8; exit(y];
+
+                // - Push what is 8bytes further from the stack top(y), by copying it(x) to the top.
+                // - pop it(x_copy) into `rdi` which will then execute it in exit(x_copy).
+                offset << "QWORD [rsp + " << (gen->m_stack_size - var.stack_loc - OFF_BY_ONE) * BIT_MULTIPLIER << "]\n";
+                gen->push(offset.str());
             }
         };
+
         ExprVisitor visitor { .gen = this };
         std::visit(visitor, expr.var);
     }
 
-    /* NOTETOME: vim `ysiw"` to surround word with `"` */
-
-    // "const" NodeStmt prevents copying around
+    // `const` NodeStmt prevents copying around
     void gen_stmt(const NodeStmt& stmt)
     {
         struct StmtVisitor {
@@ -46,13 +59,20 @@ public:
             {
                 gen->gen_expr(stmt_exit.expr);
                 gen->m_output << "    mov rax, 60\n";
-                gen->m_output << "    pop rdi\n"; // expr can be two things as well...
+                gen->pop("rdi"); // gen->m_output << "    pop rdi\n"; // expr can be two things as well...
                 gen->m_output << "    syscall\n";
             }
             void operator()(const NodeStmtLet& stmt_let)
             {
+                if (gen->m_vars.contains(stmt_let.ident.value.value())) {
+                    std::cerr << "Identifier already used: " << stmt_let.ident.value.value() << std::endl;
+                    exit(EXIT_FAILURE);
+                }
+                gen->m_vars.insert({ stmt_let.ident.value.value(), Var { .stack_loc = gen->m_stack_size } });
+                gen->gen_expr(stmt_let.expr);
             }
         };
+
         StmtVisitor visitor({ .gen = this });
         std::visit(visitor, stmt.var);
     }
@@ -64,17 +84,39 @@ public:
         for (const NodeStmt stmt : m_prog.stmts) {
             gen_stmt(stmt);
         }
+
         // if no explicit `exit()` exit with 0, else this is unreachable :)
         m_output << "    mov rax, 60\n";
         m_output << "    mov rdi, 0\n";
         m_output << "    syscall\n";
+
         return m_output.str();
     }
 
 private:
+    struct Var {
+        size_t stack_loc;
+        // TODO: include types for static typing
+    };
+
     const NodeProg m_prog;
     std::stringstream m_output;
-    size_t m_stack_size = 0; // limited numbers of registers wants us to utilize the Stack
+    size_t m_stack_size = 0; // Our own stack pointer at compile time to move around the entity offset of the
+                             // penultimate item. copy that and add it to top of stack? See 01:01:30 (Compiler Pt.3)
+                             // limited numbers of registers wants us to utilize the Stack
+    std::unordered_map<std::string, Var> m_vars {}; // track variable's positions in stack
+
+    void push(const std::string& reg)
+    {
+        m_output << "    push " << reg << "\n";
+        m_stack_size++;
+    }
+
+    void pop(const std::string& reg)
+    {
+        m_output << "    pop " << reg << "\n";
+        m_stack_size--;
+    }
 };
 
 // 45:46 (Compiler Pt.3) >> Register (rdi) called `stack pointer` keeps track of the top stack item address

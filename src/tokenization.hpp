@@ -48,8 +48,6 @@ public:
                     buf.clear();
                 }
                 else {
-                    // std::cerr << "You messed up! `exit`" << std::endl;
-                    // exit(EXIT_FAILURE);
                     tokens.push_back({ .type = TokenType::ident, .value = buf });
                     buf.clear();
                 }
