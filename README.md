@@ -1,4 +1,4 @@
-# io Language Compiler
+# io lang: C++ Language Compiler
 
 ## `asm` with linking
 
@@ -22,4 +22,5 @@ echo $?
 
 ## Credits
 
-[orosmatthew/hydrogen-cpp](https://github.com/orosmatthew/hydrogen-cpp/blob/master/src/main.cpp)
+- YouTube video series "[Creating a Compiler](https://www.youtube.com/playlist?list=PLUDlas_Zy_qC7c5tCgTMYq2idyyT241qs)" by Pixeled
+- Source [orosmatthew/hydrogen-cpp](https://github.com/orosmatthew/hydrogen-cpp) by Pixeled

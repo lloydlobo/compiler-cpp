@@ -3,3 +3,5 @@ cmake-build*
 .idea
 .vscode
 .cache
+out.o
+out

@@ -4,6 +4,7 @@
 #include <sstream>
 #include <vector>
 
+#include "arena.hpp"
 #include "generation.hpp"
 
 int main(int argc, char* argv[])
@@ -25,13 +26,8 @@ int main(int argc, char* argv[])
     Tokenizer tokenizer(std::move(contents));
     std::vector<Token> tokens = tokenizer.tokenize(); // tokenize(contents);
 
-    // { std::cout << "DEBUG::START" << "\n";
-    //     for (int i = 0; i < tokens.capacity() - 1; i++) { std::cout << ">>" << tokens.at(i).value.value_or("") <<
-    //     "\n"; } std::cout << "DEBUG::END" << "\n"; } // dbg!
-
     Parser parser(std::move(tokens));
     std::optional<NodeProg> prog = parser.parse_prog();
-
     if (!prog.has_value()) {
         std::cerr << "Invalid program" << std::endl;
         exit(EXIT_FAILURE);
@@ -48,7 +44,6 @@ int main(int argc, char* argv[])
 
     return EXIT_SUCCESS;
 }
-
 
 /*
     std::string tokens_to_asm(const std::vector<Token>& tokens)

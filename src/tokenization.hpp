@@ -9,6 +9,7 @@ enum class TokenType {
     exit,
     int_lit,
     semi,
+    plus,
     open_paren,
     close_paren,
     ident,
@@ -75,6 +76,10 @@ public:
             else if (peek().value() == '=') {
                 consume();
                 tokens.push_back({ .type = TokenType::eq });
+            }
+            else if (peek().value() == '+') {
+                consume();
+                tokens.push_back({ .type = TokenType::plus });
             }
             else if (std::isspace(peek().value())) {
                 consume();
