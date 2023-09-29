@@ -62,7 +62,6 @@ public:
             Generator* gen;
             void operator()(const NodeBinExprAdd* add) const
             {
-                // assert(false); // Not implemented
                 gen->gen_expr(add->lhs);
                 gen->gen_expr(add->rhs);
                 gen->pop("rax");

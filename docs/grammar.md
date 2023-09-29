@@ -1,6 +1,6 @@
 # Grammer
 
-Latex AST definitions for progressions.
+## Latex AST definitions for progressions
 
 ---
 
@@ -27,4 +27,29 @@ $$
 
 ---
 
-- `^*` in `[\text{Stmt}]^*` - can have more variations: $$[\text{Stmt}]^*$$
+Note:
+- `^*` in `[\text{Stmt}]^*` — can have more variations: $$[\text{Stmt}]^*$$
+
+## Grammar Visualized
+
+### Addition
+
+#### `let x = 1 + 2 + 3;`
+
+```
+        BinExpr
+        |
+    /   |   \
+  /     |     \
+Expr    +       Expr
+|               |
+Term            BinExpr
+|               |
+|           /   |   \
+|         /     |     \
+1       Expr    +       Expr
+        |               |
+        Term            Term
+        |               |
+        2               3
+```

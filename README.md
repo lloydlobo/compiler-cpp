@@ -1,13 +1,5 @@
 # io lang: C++ Language Compiler
 
-## `asm` with linking
-
-```shell
-nasm -felf64 test.asm
-ld test.o -o test
-./test
-echo $?
-```
 
 ## Build
 
@@ -17,6 +9,15 @@ cmake -S . -B build && cmake --build build
 echo $?
 
 ./out
+echo $?
+```
+
+## `asm` with linking
+
+```shell
+nasm -felf64 test.asm
+ld test.o -o test
+./test
 echo $?
 ```
 
